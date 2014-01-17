@@ -1,6 +1,7 @@
 UnixSafeRm
 ====
 Four bash scripts to use in place of the default rm command. 
+
 • *newrm* - Instead of completely removing files, moves them to a hidden directory in the users home folder, not meant to be called explicitly
 
 • *logrm* - logs the removing of a file to both a system log, and optionally (enabled by default) a .remove.log file in the users home directory. *logrm* calls *newrm* 
