@@ -1,0 +1,48 @@
+#!/bin/sh
+
+mydir="$HOME/.deleted_files"
+realrm="/bin/rm"
+copy="/bin/cp -R"
+
+if [ $# -eq 0 ] ; then #pass the error message duty to rm
+	exec $realrm 
+fi
+
+# f is the only flag we are worried about. All others are passed tp realrm
+
+flags=""
+
+while getopts "dfiPRrvW" opt 
+do
+	case $opt in 
+		f) exec $realrm "$@"	;; #exec exits this script
+		* ) flags="$flags -$opt"		;; #other flags are for rm, so this appends the flag to a new flag variable
+	esac
+done
+shift $(( $OPTIND - 1))
+
+# Make sure the $mydir exists
+
+if [ ! -d $mydir ] ; then
+	if [ ! -w $HOME ] ; then
+		echo "$(basename $0) failed: Can't create $mydir in $HOME" >&2
+		exit 1
+	fi
+	mkdir $mydir
+	chmod 700 $mydir 
+fi
+
+
+for arg
+do
+	newname="$mydir/$(date "+%S.%M.%H.%d.%m").$(basename "$arg")"
+	if [ -f "$arg" ] ; then
+		$copy "$arg" "$newname"
+	elif [ -d "$arg" ] ; then
+		$copy "$arg" "$newname"
+	fi
+done
+
+exec $realrm $flags "$@"
+
+

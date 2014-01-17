@@ -1,0 +1,55 @@
+cd /Users/nickt/.deleted_files
+realrm="/bin/rm"
+
+
+month=$(date "+%m")
+
+function monthnumber()
+{
+	monthNum=0
+	case $1 in
+		"Jan") monthNum=1;; "Feb") monthNum=2 ;;
+		"Mar") monthNum=3 ;;	"Apr") monthNum=4 ;;
+		"May") monthNum=5 ;;	"Jun") monthNum=6 ;;
+		"Jul") monthNum=7 ;;	"Aug") monthNum=8 ;;
+		"Sep") monthNum=9 ;;	"Oct") monthNum=10 ;;
+		"Nov") monthNum=11 ;;	"Dec") monthNum=12 ;;
+		*) echo "$0: Unknown numeric month value $1" >&2; exit 1
+	esac
+	echo $monthNum
+}
+
+
+#first empty the .deleted_files folder
+for f in * ; do
+	fMonth=$(echo $f | awk 'BEGIN { FS = "." } {printf $5}')
+	#trim any possible leading zeros)
+	fMonth=$(echo $fMonth | sed 's/^0*//')
+	echo "now fMonth is $fMonth"
+	monthsOld="$(($((month+12-$fMonth))%12))"
+	if [ $monthsOld -gt 3 ] ; then #if it is older than 3 months
+		#echo $f
+		$realrm -rf "$f"
+	fi
+done
+
+#now clear the removed log of the files that were just permanently deleted
+newrmlog="$HOME/.remove.log.tmp"
+cat /dev/null > $newrmlog
+
+
+while read line ; do 
+	lineMonthText=$(echo $line | awk '{ printf $2 }')
+	lineMonthNumber=$(monthnumber ${lineMonthText})
+	lineMonthsOld="$(($((month+12-$lineMonthNumber))%12))"
+	if [ $lineMonthsOld -lt 4 ] ; then
+		echo $line >> $newrmlog
+	fi
+done < "$HOME/.remove.log"
+
+#save the new remove log file
+mv $newrmlog "$HOME/.remove.log"
+
+
+exit 0
+

@@ -1,0 +1,23 @@
+#!/bin/sh
+# logrm - Logs all file deletion requests unless the -s flag is used
+
+removelog="$HOME/.remove.log"
+
+if [ $# -eq 0 ] ; then
+	echo "Usage: $(basename $0) [-s] list of files or directories" >&2
+	ecit 1
+fi
+
+if [ "$1" = "-s" ] ; then
+	#silent operation requested, don't log
+	shift
+else
+	echo "$(date): ${USER}: $@" >> $removelog
+fi
+
+#log to the all-editable user log remove file that I created
+newrm "$@"
+
+##now also log to uneditable system log file, in my case, /var/log/system.log
+logger -t logrm "${USER:-LOGNAME}: $*"
+exit 0
